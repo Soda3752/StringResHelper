@@ -19,10 +19,10 @@ fun compareResources(
         }
     }
 
-    return result.sortedBy { it.modified.key }
+    return result.sortedBy { it.modified.atLine }
 }
 
-fun parseStringResources(input: String): List<StringResource> {
+fun parseStringResources(input: String, shouldCheckFormat: Boolean, filterPrefix: String?=null): List<StringResource> {
     if (input.trim().isEmpty()) return emptyList()
 
     val resources = mutableListOf<StringResource>()
@@ -37,7 +37,11 @@ fun parseStringResources(input: String): List<StringResource> {
     }
 
     // 匹配格式為 <string name="key">value</string> 的字串資源
-    val regex = """<string\s+name="([a-z0-9_]+)">([^<]+)</string>""".toRegex()
+    val regex = if (shouldCheckFormat){
+        """<string\s+name="([a-z0-9_]+)">([^<]+)</string>""".toRegex()
+    }else{
+        """<string\s+name="([^"]+)">([^<]+)</string>""".toRegex()
+    }
 
     regex.findAll(input).forEach { matchResult ->
         val (key, value) = matchResult.destructured
@@ -53,5 +57,7 @@ fun parseStringResources(input: String): List<StringResource> {
         resources.add(StringResource(key, value, lineIndex + 1)) // 行號從1開始
     }
 
-    return resources
+    return resources.filter {
+        filterPrefix.isNullOrEmpty() || it.key.startsWith(filterPrefix)
+    }
 }

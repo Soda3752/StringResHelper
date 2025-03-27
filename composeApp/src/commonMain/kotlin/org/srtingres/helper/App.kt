@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
+import androidx.compose.material.Checkbox
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
@@ -17,6 +19,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.srtingres.helper.component.ComparisonResultList
@@ -30,9 +33,11 @@ import org.srtingres.helper.model.parseStringResources
 fun App() {
     var modifiedText by remember { mutableStateOf(originTest) }
     var referenceText by remember { mutableStateOf(lokalise) }
+    var filterPrefixText by remember { mutableStateOf("") }
     var comparisonItems by remember { mutableStateOf<List<ComparisonItem>>(emptyList()) }
     var parseError by remember { mutableStateOf("") }
     var selectedTabIndex by remember { mutableStateOf(0) }
+    var checkKeyFormat by remember { mutableStateOf(true) }
 
     MaterialTheme {
         Surface(
@@ -95,15 +100,37 @@ fun App() {
                             }
 
                             // 執行按鈕
-                            Row(
+                            Column(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
+                                horizontalAlignment = Alignment.CenterHorizontally
                             ) {
+
+                                OutlinedTextField(
+                                    value = filterPrefixText,
+                                    onValueChange = { filterPrefixText = it },
+                                    label = { Text("Filter Prefix") },
+                                    modifier = Modifier,
+                                    colors = TextFieldDefaults.textFieldColors(
+                                        backgroundColor = MaterialTheme.colors.surface
+                                    ),
+                                    maxLines = 1
+                                )
+
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text("Check Key Format")
+                                    Checkbox(
+                                        checked = checkKeyFormat,
+                                        onCheckedChange = { checkKeyFormat = it },
+                                        modifier = Modifier.padding(start = 16.dp)
+                                    )
+                                }
+
+
                                 Button(
                                     onClick = {
                                         try {
-                                            val modifiedResources = parseStringResources(modifiedText)
-                                            val referenceResources = parseStringResources(referenceText)
+                                            val modifiedResources = parseStringResources(modifiedText,checkKeyFormat,filterPrefixText)
+                                            val referenceResources = parseStringResources(referenceText,checkKeyFormat)
 
                                             comparisonItems = compareResources(modifiedResources, referenceResources)
                                             parseError = ""
