@@ -1,37 +1,125 @@
 package org.srtingres.helper
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
-
-import stringreshelper.composeapp.generated.resources.Res
-import stringreshelper.composeapp.generated.resources.compose_multiplatform
+import androidx.compose.ui.unit.dp
+import org.srtingres.helper.component.ComparisonResultList
+import org.srtingres.helper.model.ComparisonItem
+import org.srtingres.helper.model.compareResources
+import org.srtingres.helper.model.lokalise
+import org.srtingres.helper.model.originTest
+import org.srtingres.helper.model.parseStringResources
 
 @Composable
-@Preview
 fun App() {
+    var modifiedText by remember { mutableStateOf(originTest) }
+    var referenceText by remember { mutableStateOf(lokalise) }
+    var comparisonItems by remember { mutableStateOf<List<ComparisonItem>>(emptyList()) }
+    var parseError by remember { mutableStateOf("") }
+
     MaterialTheme {
-        var showContent by remember { mutableStateOf(false) }
-        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Button(onClick = { showContent = !showContent }) {
-                Text("Click me!")
-            }
-            AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
-                Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colors.background
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // 輸入區塊
+                Row(
+                    modifier = Modifier.fillMaxWidth().weight(0.5f),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // 修改檔字串
+                    TextField(
+                        value = modifiedText,
+                        onValueChange = { modifiedText = it },
+                        label = { Text("Android String Res") },
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                        colors = TextFieldDefaults.textFieldColors(
+                            backgroundColor = MaterialTheme.colors.surface
+                        ),
+                        maxLines = Int.MAX_VALUE
+                    )
+
+                    // 參考字串
+                    TextField(
+                        value = referenceText,
+                        onValueChange = { referenceText = it },
+                        label = { Text("Lokalise Res") },
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                        colors = TextFieldDefaults.textFieldColors(
+                            backgroundColor = MaterialTheme.colors.surface
+                        ),
+                        maxLines = Int.MAX_VALUE
+                    )
+                }
+
+                // 執行按鈕
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Button(
+                        onClick = {
+                            try {
+                                val modifiedResources = parseStringResources(modifiedText)
+                                val referenceResources = parseStringResources(referenceText)
+
+                                comparisonItems = compareResources(modifiedResources, referenceResources)
+                                parseError = ""
+                            } catch (e: Exception) {
+                                parseError = "Parse Error: ${e.message}"
+                                comparisonItems = emptyList()
+                            }
+                        }
+                    ) {
+                        Text("Process")
+                    }
+                }
+
+                // 結果區塊
+                Column(
+                    modifier = Modifier.fillMaxWidth().weight(0.5f)
+                ) {
+                    Text(
+                        text = "Process Result:",
+                        style = MaterialTheme.typography.h6
+                    )
+
+                    if (parseError.isNotEmpty()) {
+                        Text(
+                            text = parseError,
+                            color = MaterialTheme.colors.error,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+
+                    ComparisonResultList(
+                        items = comparisonItems,
+                        onCheckedChange = { index, checked ->
+                            comparisonItems = comparisonItems.toMutableList().apply {
+                                this[index] = this[index].copy(isChecked = checked)
+                            }.sortedWith(compareBy({ it.isChecked }, { it.modified.key }))
+                        }
+                    )
                 }
             }
         }
     }
 }
+
