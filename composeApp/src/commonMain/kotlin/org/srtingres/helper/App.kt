@@ -25,14 +25,12 @@ import androidx.compose.ui.unit.dp
 import org.srtingres.helper.component.ComparisonResultList
 import org.srtingres.helper.model.ComparisonItem
 import org.srtingres.helper.model.compareResources
-import org.srtingres.helper.model.lokalise
-import org.srtingres.helper.model.originTest
 import org.srtingres.helper.model.parseStringResources
 
 @Composable
 fun App() {
-    var modifiedText by remember { mutableStateOf(originTest) }
-    var referenceText by remember { mutableStateOf(lokalise) }
+    var modifiedText by remember { mutableStateOf("") }
+    var referenceText by remember { mutableStateOf("") }
     var filterPrefixText by remember { mutableStateOf("") }
     var comparisonItems by remember { mutableStateOf<List<ComparisonItem>>(emptyList()) }
     var parseError by remember { mutableStateOf("") }
