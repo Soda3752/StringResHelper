@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Card
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Icon
@@ -66,27 +67,32 @@ fun ComparisonResultList(
                             tint = MaterialTheme.colors.primary
                         )
                     }
-                    Column(Modifier.padding(8.dp)){
-                        Text("At Line: ${item.modified.atLine}")
-                        Row{
-                            Text("Current: ")
-                            Text(
-                                text = "<string name=\"${item.modified.key}\">${item.modified.value}</string>",
-                                modifier = Modifier.padding(horizontal = 8.dp)
-                            )
-                        }
+                    SelectionContainer() {
+                        Column(Modifier.padding(8.dp)) {
+                            Text("At Line: ${item.modified.atLine}")
 
-                        Row{
-                            Text("Lokalise:")
-                            // Reference string
-                            Text(
-                                text = item.reference?.let {
-                                    "<string name=\"${it.key}\">${it.value}</string>"
-                                } ?: "",
-                                modifier = Modifier.padding(horizontal = 8.dp)
-                            )
-                        }
 
+
+                            Row {
+                                Text("Current: ")
+                                Text(
+                                    text = "<string name=\"${item.modified.key}\">${item.modified.value}</string>",
+                                    modifier = Modifier.padding(horizontal = 8.dp)
+                                )
+                            }
+
+                            Row {
+                                Text("Lokalise:")
+                                // Reference string
+                                Text(
+                                    text = item.reference?.let {
+                                        "<string name=\"${it.key}\">${it.value}</string>"
+                                    } ?: "",
+                                    modifier = Modifier.padding(horizontal = 8.dp)
+                                )
+                            }
+
+                        }
                     }
 
                 }
