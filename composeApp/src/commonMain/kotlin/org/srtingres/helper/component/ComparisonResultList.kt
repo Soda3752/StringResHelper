@@ -12,7 +12,9 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.Create
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,16 +56,18 @@ fun ComparisonResultList(
                         onClick = {
                             item.reference?.let {
                                 clipboardManager.setText(AnnotatedString(it.key))
+
                             }
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Share,
+                            imageVector = Icons.Outlined.Create,
                             contentDescription = "Copy Key",
                             tint = MaterialTheme.colors.primary
                         )
                     }
                     Column(Modifier.padding(8.dp)){
+                        Text("At Line: ${item.modified.atLine}")
                         Row{
                             Text("Current: ")
                             Text(

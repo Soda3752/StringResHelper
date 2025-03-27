@@ -26,12 +26,31 @@ fun parseStringResources(input: String): List<StringResource> {
     if (input.trim().isEmpty()) return emptyList()
 
     val resources = mutableListOf<StringResource>()
+    val lines = input.lines()
+
+    // 計算每行起始位置的索引
+    val lineStartIndices = ArrayList<Int>()
+    var currentIndex = 0
+    lines.forEach { line ->
+        lineStartIndices.add(currentIndex)
+        currentIndex += line.length + 1 // +1 是換行符的長度
+    }
+
     // 匹配格式為 <string name="key">value</string> 的字串資源
-    val regex = """<string\s+name="([^".]+)">([^<]+)</string>""".toRegex()
+    val regex = """<string\s+name="([a-z0-9_]+)">([^<]+)</string>""".toRegex()
 
     regex.findAll(input).forEach { matchResult ->
         val (key, value) = matchResult.destructured
-        resources.add(StringResource(key, value))
+        val startPosition = matchResult.range.first
+
+        // 二分搜尋找到對應的行號
+        val lineIndex = lineStartIndices.binarySearch {
+            it.compareTo(startPosition)
+        }.let {
+            if (it >= 0) it else -it - 2
+        }
+
+        resources.add(StringResource(key, value, lineIndex + 1)) // 行號從1開始
     }
 
     return resources
