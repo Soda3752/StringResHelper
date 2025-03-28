@@ -6,23 +6,38 @@ fun compareResources(
 ): List<ComparisonItem> {
     val result = mutableListOf<ComparisonItem>()
 
-    // 建立參考資源的映射表，便於查詢
-    val referenceMap = reference.associateBy { it.value }
+    // 建立參考資源的映射表，相同 value 對應到多個資源
+    val referenceMap = mutableMapOf<String, MutableList<StringResource>>()
+
+    // 將所有參考資源按照 value 分組
+    for (ref in reference) {
+        referenceMap.getOrPut(ref.value) { mutableListOf() }.add(ref)
+    }
 
     for (mod in modified) {
-        // 查找相同value的參考資源
-        val ref = referenceMap[mod.value]
+        // 查找所有相同 value 的參考資源
+        val refs = referenceMap[mod.value]
 
-        // 只有當value相同但key不同時，才添加到結果列表
-        if (ref != null && mod.key != ref.key) {
-            result.add(ComparisonItem(modified = mod, reference = ref))
+        // 過濾出 key 不同的參考資源
+        if (refs != null) {
+            val isAlreadyHaveKey = refs.any { it.key == mod.key && it.value == mod.value }
+            if (!isAlreadyHaveKey) {
+                val differentKeyRefs = refs.filter { it.key != mod.key }.toMutableList()
+                if (differentKeyRefs.isNotEmpty()) {
+                    result.add(ComparisonItem(modified = mod, reference = differentKeyRefs))
+                }
+            }
         }
     }
 
     return result.sortedBy { it.modified.atLine }
 }
 
-fun parseStringResources(input: String, shouldCheckFormat: Boolean, filterPrefix: String?=null): List<StringResource> {
+fun parseStringResources(
+    input: String,
+    shouldCheckFormat: Boolean,
+    filterPrefix: String? = null
+): List<StringResource> {
     if (input.trim().isEmpty()) return emptyList()
 
     val resources = mutableListOf<StringResource>()
@@ -37,9 +52,9 @@ fun parseStringResources(input: String, shouldCheckFormat: Boolean, filterPrefix
     }
 
     // 匹配格式為 <string name="key">value</string> 的字串資源
-    val regex = if (shouldCheckFormat){
+    val regex = if (shouldCheckFormat) {
         """<string\s+name="([a-z0-9_]+)">([^<]+)</string>""".toRegex()
-    }else{
+    } else {
         """<string\s+name="([^"]+)">([^<]+)</string>""".toRegex()
     }
 

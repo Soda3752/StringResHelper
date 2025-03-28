@@ -13,8 +13,6 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.Create
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -55,9 +53,8 @@ fun ComparisonResultList(
                     // Copy Key Button
                     IconButton(
                         onClick = {
-                            item.reference?.let {
+                            item.reference?.firstOrNull()?.let {
                                 clipboardManager.setText(AnnotatedString(it.key))
-
                             }
                         }
                     ) {
@@ -71,8 +68,6 @@ fun ComparisonResultList(
                         Column(Modifier.padding(8.dp)) {
                             Text("At Line: ${item.modified.atLine}")
 
-
-
                             Row {
                                 Text("Current: ")
                                 Text(
@@ -80,16 +75,30 @@ fun ComparisonResultList(
                                     modifier = Modifier.padding(horizontal = 8.dp)
                                 )
                             }
-
-                            Row {
-                                Text("Lokalise:")
-                                // Reference string
-                                Text(
-                                    text = item.reference?.let {
-                                        "<string name=\"${it.key}\">${it.value}</string>"
-                                    } ?: "",
-                                    modifier = Modifier.padding(horizontal = 8.dp)
-                                )
+                            Column {
+                                item.reference?.let { refList ->
+                                    if (refList.size == 1) {
+                                        // 只有一筆資料的情況，保持原樣
+                                        Row {
+                                            Text("Lokalise:")
+                                            Text(
+                                                text = "<string name=\"${refList[0].key}\">${refList[0].value}</string>",
+                                                modifier = Modifier.padding(horizontal = 8.dp)
+                                            )
+                                        }
+                                    } else {
+                                        // 多筆資料的情況，使用索引編號
+                                        refList.forEachIndexed { index, ref ->
+                                            Row {
+                                                Text("Lokalise_${index + 1}:")
+                                                Text(
+                                                    text = "<string name=\"${ref.key}\">${ref.value}</string>",
+                                                    modifier = Modifier.padding(horizontal = 8.dp)
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
                             }
 
                         }
