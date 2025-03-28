@@ -1,20 +1,28 @@
 package org.srtingres.helper.component
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Card
 import androidx.compose.material.Checkbox
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Create
+import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -29,7 +37,7 @@ fun ComparisonResultList(
     onCheckedChange: (Int, Boolean) -> Unit
 ) {
     val clipboardManager = LocalClipboardManager.current
-
+    var expandedPosition by remember { mutableStateOf(-1) }
     LazyColumn {
         items(items.size) { index ->
             val item = items[index]
@@ -51,18 +59,48 @@ fun ComparisonResultList(
                     )
 
                     // Copy Key Button
-                    IconButton(
-                        onClick = {
-                            item.reference?.firstOrNull()?.let {
-                                clipboardManager.setText(AnnotatedString(it.key))
+                    Box {
+                        IconButton(
+                            onClick = {
+                                if ((item.reference?.size ?: 0) > 1) {
+                                    // 如果有多筆，顯示下拉選單
+                                    expandedPosition = index
+                                } else {
+                                    // 如果只有一筆或沒有，直接複製
+                                    item.reference?.firstOrNull()?.let {
+                                        clipboardManager.setText(AnnotatedString(it.key))
+                                        // 可選擇顯示複製成功提示
+                                        // showToast("已複製鍵值: ${it.key}")
+                                    }
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Create,
+                                contentDescription = "Copy Key",
+                                tint = MaterialTheme.colors.primary
+                            )
+                        }
+
+                        // 下拉選單
+                        DropdownMenu(
+                            expanded = expandedPosition == index,
+                            onDismissRequest = { expandedPosition = -1 },
+                            modifier = Modifier.width(IntrinsicSize.Min)
+                        ) {
+                            item.reference?.forEachIndexed { index, ref ->
+                                DropdownMenuItem(
+                                    onClick = {
+                                        clipboardManager.setText(AnnotatedString(ref.key))
+                                        expandedPosition = -1
+                                        // 可選擇顯示複製成功提示
+                                        // showToast("已複製鍵值: ${ref.key}")
+                                    }
+                                ) {
+                                    Text("${index + 1}. ${ref.key}")
+                                }
                             }
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Create,
-                            contentDescription = "Copy Key",
-                            tint = MaterialTheme.colors.primary
-                        )
                     }
                     SelectionContainer() {
                         Column(Modifier.padding(8.dp)) {
