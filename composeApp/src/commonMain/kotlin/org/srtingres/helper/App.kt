@@ -136,12 +136,12 @@ fun App() {
                                     onClick = {
                                         try {
                                             val modifiedResources = if (isIosMode) {
-                                                parseIosStringResources(modifiedText)
+                                                parseIosStringResources(modifiedText, filterPrefixText)
                                             } else {
                                                 parseStringResources(modifiedText, checkKeyFormat, filterPrefixText)
                                             }
 
-                                            val referenceResources = parseStringResources(referenceText,checkKeyFormat)
+                                            val referenceResources = parseStringResources(referenceText, checkKeyFormat)
 
                                             comparisonItems = compareResources(modifiedResources, referenceResources)
                                             parseError = ""

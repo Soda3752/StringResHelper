@@ -81,7 +81,7 @@ fun parseStringResources(
 }
 
 
-fun parseIosStringResources(input: String): List<StringResource> {
+fun parseIosStringResources(input: String, filterPrefix: String? = null): List<StringResource> {
     val format = Json {
         ignoreUnknownKeys = true
         isLenient = true
@@ -91,7 +91,10 @@ fun parseIosStringResources(input: String): List<StringResource> {
         val resourceFile = format.decodeFromString<StringResourceFile>(input)
         return resourceFile.strings.mapNotNull { (key, entry) ->
             val enValue = entry.localizations?.get("en")?.stringUnit?.value
-            if (key.isNotEmpty() && !enValue.isNullOrEmpty()) {
+            if (key.isNotEmpty() && !enValue.isNullOrEmpty() && (filterPrefix.isNullOrEmpty() || key.startsWith(
+                    filterPrefix
+                ))
+            ) {
                 StringResource(key, enValue, lineRow.indexOfFirst { it.contains(key) } + 1)
             } else null
         }
