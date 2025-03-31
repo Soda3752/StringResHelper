@@ -1,5 +1,8 @@
 package org.srtingres.helper.model
 
+import kotlinx.serialization.json.Json
+
+
 fun compareResources(
     modified: List<StringResource>,
     reference: List<StringResource>
@@ -74,5 +77,26 @@ fun parseStringResources(
 
     return resources.filter {
         filterPrefix.isNullOrEmpty() || it.key.startsWith(filterPrefix)
+    }
+}
+
+
+fun parseIosStringResources(input: String): List<StringResource> {
+    val format = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+    }
+    val lineRow = input.lines()
+    try {
+        val resourceFile = format.decodeFromString<StringResourceFile>(input)
+        return resourceFile.strings.mapNotNull { (key, entry) ->
+            val enValue = entry.localizations?.get("en")?.stringUnit?.value
+            if (key.isNotEmpty() && !enValue.isNullOrEmpty()) {
+                StringResource(key, enValue, lineRow.indexOfFirst { it.contains(key) } + 1)
+            } else null
+        }
+    } catch (e: Exception) {
+        println("解析錯誤: ${e.message}")
+        return emptyList()
     }
 }

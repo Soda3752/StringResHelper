@@ -13,6 +13,7 @@ import androidx.compose.material.Checkbox
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
+import androidx.compose.material.Switch
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
@@ -25,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import org.srtingres.helper.component.ComparisonResultList
 import org.srtingres.helper.model.ComparisonItem
 import org.srtingres.helper.model.compareResources
+import org.srtingres.helper.model.parseIosStringResources
 import org.srtingres.helper.model.parseStringResources
 
 @Composable
@@ -36,6 +38,7 @@ fun App() {
     var parseError by remember { mutableStateOf("") }
     var selectedTabIndex by remember { mutableStateOf(0) }
     var checkKeyFormat by remember { mutableStateOf(true) }
+    var isIosMode by remember { mutableStateOf(false) }
 
     MaterialTheme {
         Surface(
@@ -76,7 +79,7 @@ fun App() {
                                 TextField(
                                     value = modifiedText,
                                     onValueChange = { modifiedText = it },
-                                    label = { Text("Android String Res") },
+                                    label = { Text("Modify Res") },
                                     modifier = Modifier.weight(1f).fillMaxHeight(),
                                     colors = TextFieldDefaults.textFieldColors(
                                         backgroundColor = MaterialTheme.colors.surface
@@ -102,6 +105,11 @@ fun App() {
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(if (isIosMode) "iOS Mode" else "Android Mode")
+                                    Switch(isIosMode, onCheckedChange = { isIosMode = it })
+                                }
+
 
                                 OutlinedTextField(
                                     value = filterPrefixText,
@@ -127,7 +135,12 @@ fun App() {
                                 Button(
                                     onClick = {
                                         try {
-                                            val modifiedResources = parseStringResources(modifiedText,checkKeyFormat,filterPrefixText)
+                                            val modifiedResources = if (isIosMode) {
+                                                parseIosStringResources(modifiedText)
+                                            } else {
+                                                parseStringResources(modifiedText, checkKeyFormat, filterPrefixText)
+                                            }
+
                                             val referenceResources = parseStringResources(referenceText,checkKeyFormat)
 
                                             comparisonItems = compareResources(modifiedResources, referenceResources)
