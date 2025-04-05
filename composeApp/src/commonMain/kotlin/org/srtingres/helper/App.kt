@@ -7,7 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import org.srtingres.helper.component.DiffTab
 import org.srtingres.helper.component.InputTab
-import org.srtingres.helper.component.ResultTab
+import org.srtingres.helper.component.MissTab
 import org.srtingres.helper.model.*
 
 @Composable
@@ -40,12 +40,12 @@ fun App() {
                     Tab(
                         selected = selectedTabIndex == 1,
                         onClick = { selectedTabIndex = 1 },
-                        text = { Text("Result") }
+                        text = { Text("Diff") }
                     )
                     Tab(
                         selected = selectedTabIndex == 2,
                         onClick = { selectedTabIndex = 2 },
-                        text = { Text("Diff") }
+                        text = { Text("Missing") }
                     )
                 }
 
@@ -80,7 +80,7 @@ fun App() {
                                 referenceMissingItems = modifiedResources.filter { mod ->
                                     referenceResources.none { it.key == mod.key }
                                 }
-                                
+
                                 parseError = ""
                                 selectedTabIndex = 1
                             } catch (e: Exception) {
@@ -93,7 +93,7 @@ fun App() {
                         }
                     )
 
-                    1 -> ResultTab(
+                    1 -> DiffTab(
                         comparisonItems = comparisonItems,
                         parseError = parseError,
                         onCheckedChange = { index, checked ->
@@ -103,7 +103,7 @@ fun App() {
                         }
                     )
 
-                    2 -> DiffTab(
+                    2 -> MissTab(
                         modifiedMissingItems = modifiedMissingItems,
                         referenceMissingItems = referenceMissingItems
                     )
