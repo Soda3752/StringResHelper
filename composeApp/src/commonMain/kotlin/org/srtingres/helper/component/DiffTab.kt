@@ -5,15 +5,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Create
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.painterResource
 import org.srtingres.helper.model.StringResource
+import org.srtingres.helper.resources.Res
+import org.srtingres.helper.resources.ic_copy
+import org.srtingres.helper.resources.ic_key
 
 @Composable
 fun DiffTab(
@@ -46,18 +48,35 @@ fun DiffTab(
                     onCheckedChange = onCheckedChange
                 )
 
-
-                IconButton(
-                    onClick = {
-                        clipboardManager.setText(AnnotatedString(item.key))
+                Column {
+                    IconButton(
+                        modifier = Modifier.size(24.dp),
+                        onClick = {
+                            clipboardManager.setText(AnnotatedString(item.key))
+                        }
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(Res.drawable.ic_key),
+                            contentDescription = "Copy Key",
+                            tint = MaterialTheme.colors.primary
+                        )
                     }
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Create,
-                        contentDescription = "Copy Key",
-                        tint = MaterialTheme.colors.primary
-                    )
+                    IconButton(
+                        modifier = Modifier.size(24.dp),
+                        onClick = {
+                            clipboardManager.setText(AnnotatedString(item.value))
+                        }
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(Res.drawable.ic_copy),
+                            contentDescription = "Copy Value",
+                            tint = MaterialTheme.colors.primary
+                        )
+                    }
                 }
+
 
                 SelectionContainer {
                     Row(Modifier.padding(8.dp)) {

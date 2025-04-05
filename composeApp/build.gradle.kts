@@ -65,3 +65,9 @@ compose.desktop {
         }
     }
 }
+
+compose.resources {
+    publicResClass = false
+    packageOfResClass = "org.srtingres.helper.resources"
+    generateResClass = auto
+}
