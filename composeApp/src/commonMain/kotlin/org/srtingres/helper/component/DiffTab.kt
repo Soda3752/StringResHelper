@@ -26,6 +26,21 @@ fun DiffTab(
     var checkedModifiedItems by remember { mutableStateOf<Set<String>>(setOf()) }
     var checkedReferenceItems by remember { mutableStateOf<Set<String>>(setOf()) }
 
+    // 新增排序函數
+    fun List<StringResource>.sortByChecked(checkedItems: Set<String>): List<StringResource> {
+        return sortedWith(compareBy<StringResource> { checkedItems.contains(it.key) }
+            .thenBy { it.key })
+    }
+
+    // 對列表進行排序
+    val sortedModifiedItems = remember(modifiedMissingItems, checkedModifiedItems) {
+        modifiedMissingItems.sortByChecked(checkedModifiedItems)
+    }
+
+    val sortedReferenceItems = remember(referenceMissingItems, checkedReferenceItems) {
+        referenceMissingItems.sortByChecked(checkedReferenceItems)
+    }
+
     @Composable
     fun ResourceItem(
         item: StringResource,
@@ -132,7 +147,7 @@ fun DiffTab(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(modifiedMissingItems) { item ->
+                items(sortedModifiedItems) { item ->
                     ResourceItem(
                         item = item,
                         isChecked = checkedModifiedItems.contains(item.key),
@@ -162,7 +177,7 @@ fun DiffTab(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(referenceMissingItems) { item ->
+                items(sortedReferenceItems) { item ->
                     ResourceItem(
                         item = item,
                         isChecked = checkedReferenceItems.contains(item.key),
