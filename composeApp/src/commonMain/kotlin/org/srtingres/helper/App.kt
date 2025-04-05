@@ -5,12 +5,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import org.srtingres.helper.component.DiffTab
 import org.srtingres.helper.component.InputTab
 import org.srtingres.helper.component.ResultTab
-import org.srtingres.helper.model.ComparisonItem
-import org.srtingres.helper.model.compareResources
-import org.srtingres.helper.model.parseIosStringResources
-import org.srtingres.helper.model.parseStringResources
+import org.srtingres.helper.model.*
 
 @Composable
 fun App() {
@@ -22,6 +20,8 @@ fun App() {
     var selectedTabIndex by remember { mutableStateOf(0) }
     var checkKeyFormat by remember { mutableStateOf(true) }
     var isIosMode by remember { mutableStateOf(false) }
+    var modifiedMissingItems by remember { mutableStateOf<List<StringResource>>(emptyList()) }
+    var referenceMissingItems by remember { mutableStateOf<List<StringResource>>(emptyList()) }
 
     MaterialTheme {
         Surface(
@@ -41,6 +41,11 @@ fun App() {
                         selected = selectedTabIndex == 1,
                         onClick = { selectedTabIndex = 1 },
                         text = { Text("Result") }
+                    )
+                    Tab(
+                        selected = selectedTabIndex == 2,
+                        onClick = { selectedTabIndex = 2 },
+                        text = { Text("Diff") }
                     )
                 }
 
@@ -67,11 +72,22 @@ fun App() {
                                 val referenceResources = parseStringResources(referenceText, checkKeyFormat)
 
                                 comparisonItems = compareResources(modifiedResources, referenceResources)
+
+                                // 計算缺少的項目
+                                modifiedMissingItems = referenceResources.filter { ref ->
+                                    modifiedResources.none { it.key == ref.key }
+                                }
+                                referenceMissingItems = modifiedResources.filter { mod ->
+                                    referenceResources.none { it.key == mod.key }
+                                }
+                                
                                 parseError = ""
                                 selectedTabIndex = 1
                             } catch (e: Exception) {
                                 parseError = "Parse Error: ${e.message}"
                                 comparisonItems = emptyList()
+                                modifiedMissingItems = emptyList()
+                                referenceMissingItems = emptyList()
                                 selectedTabIndex = 1
                             }
                         }
@@ -85,6 +101,11 @@ fun App() {
                                 this[index] = this[index].copy(isChecked = checked)
                             }.sortedWith(compareBy({ it.isChecked }, { it.modified.key }))
                         }
+                    )
+
+                    2 -> DiffTab(
+                        modifiedMissingItems = modifiedMissingItems,
+                        referenceMissingItems = referenceMissingItems
                     )
                 }
             }
