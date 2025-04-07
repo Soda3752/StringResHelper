@@ -3,31 +3,61 @@ package org.srtingres.helper.model
 import kotlinx.serialization.json.Json
 
 
+/**
+ * @param isKeyDiff 是比較 key 的差異 或 者 value 的差異
+ */
 fun compareResources(
     modified: List<StringResource>,
-    reference: List<StringResource>
+    reference: List<StringResource>,
+    isKeyDiff: Boolean = true
 ): List<ComparisonItem> {
     val result = mutableListOf<ComparisonItem>()
 
-    // 建立參考資源的映射表，相同 value 對應到多個資源
-    val referenceMap = mutableMapOf<String, MutableList<StringResource>>()
+    if (isKeyDiff) {
+        // 建立參考資源的映射表，相同 value 對應到多個資源
+        val referenceMap = mutableMapOf<String, MutableList<StringResource>>()
 
-    // 將所有參考資源按照 value 分組
-    for (ref in reference) {
-        referenceMap.getOrPut(ref.value) { mutableListOf() }.add(ref)
-    }
+        // 將所有參考資源按照 value 分組
+        for (ref in reference) {
+            referenceMap.getOrPut(ref.value) { mutableListOf() }.add(ref)
+        }
 
-    for (mod in modified) {
-        // 查找所有相同 value 的參考資源
-        val refs = referenceMap[mod.value]
+        for (mod in modified) {
+            // 查找所有相同 value 的參考資源
+            val refs = referenceMap[mod.value]
 
-        // 過濾出 key 不同的參考資源
-        if (refs != null) {
-            val isAlreadyHaveKey = refs.any { it.key == mod.key && it.value == mod.value }
-            if (!isAlreadyHaveKey) {
-                val differentKeyRefs = refs.filter { it.key != mod.key }.toMutableList()
-                if (differentKeyRefs.isNotEmpty()) {
-                    result.add(ComparisonItem(modified = mod, reference = differentKeyRefs))
+            // 過濾出 key 不同的參考資源
+            if (refs != null) {
+                val isAlreadyHaveKey = refs.any { it.key == mod.key && it.value == mod.value }
+                if (!isAlreadyHaveKey) {
+                    val differentKeyRefs = refs.filter { it.key != mod.key }.toMutableList()
+                    if (differentKeyRefs.isNotEmpty()) {
+                        result.add(ComparisonItem(modified = mod, reference = differentKeyRefs))
+                    }
+                }
+            }
+        }
+    } else {
+        // 建立參考資源的映射表，相同 key 對應到多個資源
+        val referenceMap = mutableMapOf<String, MutableList<StringResource>>()
+
+        // 將所有參考資源按照 key 分組
+        for (ref in reference) {
+            referenceMap.getOrPut(ref.key) { mutableListOf() }.add(ref)
+        }
+
+        for (mod in modified) {
+            // 查找所有相同 key 的參考資源
+            val refs = referenceMap[mod.key]
+
+            // 過濾出 value 不同的參考資源
+            if (refs != null) {
+                val isAlreadyHaveValue = refs.any { it.key == mod.key && it.value == mod.value }
+                if (!isAlreadyHaveValue) {
+                    val differentValueRefs = refs.filter { it.value != mod.value }.toMutableList()
+                    if (differentValueRefs.isNotEmpty()) {
+                        result.add(ComparisonItem(modified = mod, reference = differentValueRefs))
+                    }
                 }
             }
         }
