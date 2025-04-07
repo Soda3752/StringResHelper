@@ -195,7 +195,11 @@ fun MissTab(
             modifier = Modifier.weight(1f)
         ) {
             Text(
-                text = "Missing in Modified (${modifiedMissingItems.size})",
+                text = "Missing in Modified (${
+                    modifiedMissingItems.filter {
+                        checkedModifiedItems.contains(it.key).not()
+                    }.size
+                })",
                 style = MaterialTheme.typography.h6,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
@@ -234,7 +238,11 @@ fun MissTab(
             modifier = Modifier.weight(1f)
         ) {
             Text(
-                text = "Missing in Reference (${referenceMissingItems.size})",
+                text = "Missing in Reference (${
+                    referenceMissingItems.filter {
+                        checkedReferenceItems.contains(it.key).not()
+                    }.size
+                })",
                 style = MaterialTheme.typography.h6,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
