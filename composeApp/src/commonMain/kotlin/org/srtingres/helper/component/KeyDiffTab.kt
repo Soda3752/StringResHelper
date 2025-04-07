@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.dp
 import org.srtingres.helper.model.ComparisonItem
 
 @Composable
-fun DiffTab(
+fun KeyDiffTab(
     comparisonItems: List<ComparisonItem>,
     parseError: String,
     onCheckedChange: (Int, Boolean) -> Unit

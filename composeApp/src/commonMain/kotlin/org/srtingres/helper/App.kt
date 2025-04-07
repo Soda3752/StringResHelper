@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import org.srtingres.helper.component.DiffTab
 import org.srtingres.helper.component.InputTab
+import org.srtingres.helper.component.KeyDiffTab
 import org.srtingres.helper.component.MissTab
 import org.srtingres.helper.model.*
 
@@ -40,7 +40,7 @@ fun App() {
                     Tab(
                         selected = selectedTabIndex == 1,
                         onClick = { selectedTabIndex = 1 },
-                        text = { Text("Diff") }
+                        text = { Text("KeyDiff") }
                     )
                     Tab(
                         selected = selectedTabIndex == 2,
@@ -93,7 +93,7 @@ fun App() {
                         }
                     )
 
-                    1 -> DiffTab(
+                    1 -> KeyDiffTab(
                         comparisonItems = comparisonItems,
                         parseError = parseError,
                         onCheckedChange = { index, checked ->
