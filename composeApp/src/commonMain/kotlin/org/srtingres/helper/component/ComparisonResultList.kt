@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import org.srtingres.helper.model.ComparisonItem
 import org.srtingres.helper.resources.Res
+import org.srtingres.helper.resources.ic_copy
 import org.srtingres.helper.resources.ic_key
 
 
@@ -42,52 +43,67 @@ fun ComparisonResultList(
                             onCheckedChange(index, checked)
                         }
                     )
-
-                    // Copy Key Button
-                    Box {
-                        IconButton(
-                            onClick = {
-                                if ((item.reference?.size ?: 0) > 1) {
-                                    // 如果有多筆，顯示下拉選單
-                                    expandedPosition = index
-                                } else {
-                                    // 如果只有一筆或沒有，直接複製
-                                    item.reference?.firstOrNull()?.let {
-                                        clipboardManager.setText(AnnotatedString(it.key))
-                                        // 可選擇顯示複製成功提示
-                                        // showToast("已複製鍵值: ${it.key}")
+                    Column {
+                        // Copy Key Button
+                        Box(Modifier.size(24.dp)) {
+                            IconButton(
+                                onClick = {
+                                    if ((item.reference?.size ?: 0) > 1) {
+                                        // 如果有多筆，顯示下拉選單
+                                        expandedPosition = index
+                                    } else {
+                                        // 如果只有一筆或沒有，直接複製
+                                        item.reference?.firstOrNull()?.let {
+                                            clipboardManager.setText(AnnotatedString(it.key))
+                                            // 可選擇顯示複製成功提示
+                                            // showToast("已複製鍵值: ${it.key}")
+                                        }
                                     }
                                 }
+                            ) {
+                                Icon(
+                                    modifier = Modifier.size(24.dp),
+                                    painter = painterResource(Res.drawable.ic_key),
+                                    contentDescription = "Copy Key",
+                                    tint = MaterialTheme.colors.primary
+                                )
+                            }
+
+                            // 下拉選單
+                            DropdownMenu(
+                                expanded = expandedPosition == index,
+                                onDismissRequest = { expandedPosition = -1 },
+                                modifier = Modifier.width(IntrinsicSize.Min)
+                            ) {
+                                item.reference?.forEachIndexed { index, ref ->
+                                    DropdownMenuItem(
+                                        onClick = {
+                                            clipboardManager.setText(AnnotatedString(ref.key))
+                                            expandedPosition = -1
+                                            // 可選擇顯示複製成功提示
+                                            // showToast("已複製鍵值: ${ref.key}")
+                                        }
+                                    ) {
+                                        Text("${index + 1}. ${ref.key}")
+                                    }
+                                }
+                            }
+                        }
+                        IconButton(
+                            modifier = Modifier.size(24.dp),
+                            onClick = {
+                                clipboardManager.setText(AnnotatedString(item.modified.value))
                             }
                         ) {
                             Icon(
                                 modifier = Modifier.size(24.dp),
-                                painter = painterResource(Res.drawable.ic_key),
-                                contentDescription = "Copy Key",
+                                painter = painterResource(Res.drawable.ic_copy),
+                                contentDescription = "Copy Value",
                                 tint = MaterialTheme.colors.primary
                             )
                         }
-
-                        // 下拉選單
-                        DropdownMenu(
-                            expanded = expandedPosition == index,
-                            onDismissRequest = { expandedPosition = -1 },
-                            modifier = Modifier.width(IntrinsicSize.Min)
-                        ) {
-                            item.reference?.forEachIndexed { index, ref ->
-                                DropdownMenuItem(
-                                    onClick = {
-                                        clipboardManager.setText(AnnotatedString(ref.key))
-                                        expandedPosition = -1
-                                        // 可選擇顯示複製成功提示
-                                        // showToast("已複製鍵值: ${ref.key}")
-                                    }
-                                ) {
-                                    Text("${index + 1}. ${ref.key}")
-                                }
-                            }
-                        }
                     }
+
                     SelectionContainer {
                         Column(Modifier.padding(8.dp)) {
                             Text("At Line: ${item.modified.atLine}")
