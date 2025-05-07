@@ -1,6 +1,6 @@
 # String Resource 比對工具
 
-[前往網站](https://wl02972951.github.io/StringResHelper/)
+[前往網站](https://soda3752.github.io/StringResHelper/)
 
 ## 專案簡介
 
